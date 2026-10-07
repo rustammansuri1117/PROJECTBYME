@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useHotels from "../../hooks/useHotels";
 import { imageUrl } from "../../api/hotels";
 import Pagination from "../Pagination/Pagination";
@@ -8,6 +9,7 @@ import "./HotelCard.css";
 const HOTELS_PER_PAGE = 4;
 
 const HotelCard = ({ filters = {} }) => {
+    const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(1);
 
     const { hotels, pagination, loading, error } = useHotels({
@@ -48,7 +50,10 @@ const HotelCard = ({ filters = {} }) => {
                         <h3>₹{hotel.price} / night</h3>
 
                         {/* Book Now Button */}
-                        <button className="book-btn">
+                        <button
+                            className="book-btn"
+                            onClick={() => navigate(`/book/${hotel.id}`)}
+                        >
                             Book Now
                         </button>
 

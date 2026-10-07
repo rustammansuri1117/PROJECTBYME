@@ -89,3 +89,40 @@ curl "http://localhost:5000/api/hotels?search=sea&maxPrice=6000&page=1&limit=4"
 - **Update Hotel / Delete Hotel**: list from the API, save via `PUT`, remove via `DELETE`
 - `vite.config.js`: dev proxy to the backend
 - Fixed the import `./Component/FormPage/Form` to `./Component/Formpage/Form` to match the real folder name (the old path fails on Linux/macOS)
+
+## Booking ("Book Now")
+
+Click **Book Now** on a hotel card to open `/book/:id`.
+
+1. Guest details: full name, email, phone.
+2. Stay details: check-in, check-out, adults, children, rooms, special requests.
+3. A live price summary shows nights x rooms x price per night.
+4. **Confirm Booking** saves the booking in PostgreSQL and opens `/booking/<REFERENCE>` (for example `BK261007K4M9Q`) with all details and a Print button.
+
+Rules checked by the backend: valid email and phone, check-in not in the past, check-out after check-in (max 30 nights), at least one adult per room, max 4 guests per room. The total price is always calculated on the server from the hotel's real price.
+No payment gateway: the guest pays at the hotel.
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| POST | `/api/bookings` | Create a booking (JSON body) |
+| GET | `/api/bookings/:reference` | Get one booking (confirmation page) |
+
+The `bookings` table is in `backend/sql/schema.sql`. **Run `npm run db:init` once more** to create it (existing hotels are not touched).
+
+## Redux
+
+Redux Toolkit holds the hotel list, the selected hotel and the booking.
+
+| File | Purpose |
+|------|---------|
+| `frontend/src/store/store.js` | Creates the store (`state.hotels`, `state.bookings`) |
+| `frontend/src/store/hotelsSlice.js` | `loadHotels`, `loadHotel`, `addHotel`, `editHotel`, `removeHotel` |
+| `frontend/src/store/bookingsSlice.js` | `createBooking`, `loadBooking` |
+| `frontend/src/hooks/useHotels.js` | Loads the hotel list into the store |
+
+## React Helmet (page titles and meta tags)
+
+`react-helmet-async` (the maintained version of React Helmet) sets the browser tab title and meta description on every page. `HelmetProvider` is in `main.jsx`, and each page has a `<Helmet>` block (Home, Book, Confirmation, Add, Update, Delete, 404).
+
+After pulling these changes run `npm install` in `frontend/` (adds `@reduxjs/toolkit`, `react-redux`, `react-helmet-async`).
+

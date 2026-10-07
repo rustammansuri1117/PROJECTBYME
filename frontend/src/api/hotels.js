@@ -2,6 +2,9 @@ import fallbackImage from '../assets/hotel.png'
 
 const BASE = import.meta.env.VITE_API_URL || ''
 
+const WRONG_SERVER =
+  'Unexpected response from the server. Make sure the hotel backend is running (npm run dev in backend/) and that nothing else is using port 5000.'
+
 async function request(url, options) {
   let res
   try {
@@ -11,6 +14,8 @@ async function request(url, options) {
   }
   const body = await res.json().catch(() => null)
   if (!res.ok) throw new Error(body?.message || `Request failed (${res.status})`)
+  // A 200 that is not a JSON object means we are not talking to the hotel backend
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) throw new Error(WRONG_SERVER)
   return body
 }
 
@@ -26,10 +31,21 @@ export function toQueryString(params = {}) {
 }
 
 // GET /api/hotels?search=&location=&maxPrice=&page=&limit=
-export const fetchHotels = (queryString) => request(`/api/hotels?${queryString}`)
+export async function fetchHotels(queryString) {
+  const body = await request(`/api/hotels?${queryString}`)
+  if (!Array.isArray(body.data) || !body.pagination) throw new Error(WRONG_SERVER)
+  return body
+}
 
 // GET /api/hotels/locations
 export const fetchLocations = () => request('/api/hotels/locations')
+
+// GET /api/hotels/:id
+export async function fetchHotel(id) {
+  const body = await request(`/api/hotels/${id}`)
+  if (!body.data || typeof body.data !== 'object') throw new Error(WRONG_SERVER)
+  return body
+}
 
 // POST /api/hotels  (FormData: title, description, price, latitude, longitude, location, image)
 export const createHotel = (formData) =>
@@ -41,3 +57,18 @@ export const updateHotel = (id, formData) =>
 
 // DELETE /api/hotels/:id
 export const deleteHotel = (id) => request(`/api/hotels/${id}`, { method: 'DELETE' })
+
+// POST /api/bookings  (JSON)
+export const createBooking = (payload) =>
+  request('/api/bookings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+// GET /api/bookings/:reference
+export async function fetchBooking(reference) {
+  const body = await request(`/api/bookings/${encodeURIComponent(reference)}`)
+  if (!body.data || typeof body.data !== 'object') throw new Error(WRONG_SERVER)
+  return body
+}

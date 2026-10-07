@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 import Navbar from "./Component/Navbar";
 import Hero from "./Component/Hero/Hero";
@@ -7,6 +8,9 @@ import HotelCard from "./Component/Hotel-Card/HotelCard";
 import Form from "./Component/Formpage/Form";
 import UpdateHotel from "./Component/UpdateHotel/UpdateHotel";
 import DeleteHotel from "./Component/DeleteHotel/DeleteHotel";
+import BookingPage from "./Component/Booking/BookingPage";
+import BookingConfirmation from "./Component/Booking/BookingConfirmation";
+import NotFound from "./Component/NotFound/NotFound";
 import Footer from "./Component/Footer/Footer";
 
 // The search filters live in the URL (/?search=...&location=...&maxPrice=...)
@@ -33,8 +37,17 @@ function Home() {
 
     return (
         <>
-            <Hero key={filterKey} initial={filters} onSearch={handleSearch} />
-            <HotelCard key={filterKey} filters={filters} />
+            <Helmet>
+                <title>Mayyur Hotel | Find Your Perfect Stay</title>
+                <meta
+                    name="description"
+                    content="Comfortable hotels at the best locations and prices. Search, compare and book your stay online."
+                />
+                <meta property="og:title" content="Mayyur Hotel | Find Your Perfect Stay" />
+                <meta property="og:description" content="Comfortable hotels at the best locations and prices." />
+            </Helmet>
+            <Hero key={`hero-${filterKey}`} initial={filters} onSearch={handleSearch} />
+            <HotelCard key={`cards-${filterKey}`} filters={filters} />
         </>
     );
 }
@@ -50,6 +63,12 @@ function App() {
                 {/* Home */}
                 <Route path="/" element={<Home />} />
 
+                {/* Book a hotel (opened from "Book Now") */}
+                <Route path="/book/:id" element={<BookingPage />} />
+
+                {/* Booking confirmation */}
+                <Route path="/booking/:reference" element={<BookingConfirmation />} />
+
                 {/* Add Hotel */}
                 <Route path="/add-hotel" element={<Form />} />
 
@@ -58,6 +77,9 @@ function App() {
 
                 {/* Delete Hotel */}
                 <Route path="/delete-hotel" element={<DeleteHotel />} />
+
+                {/* Anything else */}
+                <Route path="*" element={<NotFound />} />
 
             </Routes>
 

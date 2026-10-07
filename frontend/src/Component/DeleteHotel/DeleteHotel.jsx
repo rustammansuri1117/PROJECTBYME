@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import useHotels from "../../hooks/useHotels";
-import { imageUrl, deleteHotel } from "../../api/hotels";
+import { useDispatch } from "react-redux";
+import { Helmet } from "react-helmet-async";
+import { imageUrl } from "../../api/hotels";
+import { removeHotel } from "../../store/hotelsSlice";
 import Pagination from "../Pagination/Pagination";
 import "./DeleteHotel.css";
 
 const HOTELS_PER_PAGE = 6;
 
 const DeleteHotel = () => {
+    const dispatch = useDispatch();
     const [page, setPage] = useState(1);
     const { hotels, pagination, loading, error, reload } = useHotels({
         page,
@@ -27,7 +31,7 @@ const DeleteHotel = () => {
         setDeleteError("");
 
         try {
-            const res = await deleteHotel(deleteId);
+            const res = await dispatch(removeHotel(deleteId)).unwrap() // Redux thunk -> DELETE /api/hotels/:id;
 
             setDeleteId(null);
             setMessage(res.message);
@@ -56,6 +60,10 @@ const DeleteHotel = () => {
 
     return (
         <div className="delete-hotel-container">
+
+            <Helmet>
+                <title>Delete Hotel | Mayyur Hotel</title>
+            </Helmet>
 
             <h1>Delete Hotel</h1>
 

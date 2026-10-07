@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import useHotels from "../../hooks/useHotels";
-import { imageUrl, updateHotel } from "../../api/hotels";
+import { useDispatch } from "react-redux";
+import { Helmet } from "react-helmet-async";
+import { imageUrl } from "../../api/hotels";
+import { editHotel } from "../../store/hotelsSlice";
 import Pagination from "../Pagination/Pagination";
 import "./UpdateHotel.css";
 
 const HOTELS_PER_PAGE = 6;
 
 const UpdateHotel = () => {
+    const dispatch = useDispatch();
     const [page, setPage] = useState(1);
     const { hotels, pagination, loading, error, reload } = useHotels({
         page,
@@ -78,7 +82,7 @@ const UpdateHotel = () => {
         setMessage(null);
 
         try {
-            const res = await updateHotel(selectedHotel.id, body);
+            const res = await dispatch(editHotel({ id: selectedHotel.id, formData: body })).unwrap() // Redux thunk -> PUT /api/hotels/:id;
             setSelectedHotel(null);
             setMessage({ type: "success", text: res.message });
             reload();
@@ -96,6 +100,10 @@ const UpdateHotel = () => {
 
     return (
         <div className="update-hotel-container">
+
+            <Helmet>
+                <title>Update Hotel | Mayyur Hotel</title>
+            </Helmet>
 
             <h1>Update Hotel</h1>
 

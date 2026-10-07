@@ -1,7 +1,7 @@
 .form-page {
     min-height: 100vh;
     /* background-color: #eeeeee; */
-    background-image: url("src/assets/hotel2.png");
+    background-image: url("../../assets/hotel2.png");
     background-size: cover;
     opacity: 20px;
     display: flex;

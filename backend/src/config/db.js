@@ -5,6 +5,8 @@ const { Pool, types } = pg;
 // NUMERIC columns (price, latitude, longitude) come back as strings by default.
 // Parse them to JS numbers so the API returns real numbers.
 types.setTypeParser(types.builtins.NUMERIC, (value) => parseFloat(value));
+// DATE columns (check_in / check_out) stay plain 'YYYY-MM-DD' strings (no timezone shifting)
+types.setTypeParser(types.builtins.DATE, (value) => value);
 
 const pool = new Pool(
   process.env.DATABASE_URL

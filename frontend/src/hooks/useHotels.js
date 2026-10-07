@@ -1,39 +1,37 @@
-import { useEffect, useState } from 'react'
-import { fetchHotels, toQueryString } from '../api/hotels'
+import { useCallback, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { loadHotels, clearList } from '../store/hotelsSlice'
+import { toQueryString } from '../api/hotels'
 
 /**
- * Loads one page of hotels from the API.
+ * Loads one page of hotels into the Redux store and returns it.
  * `params` = { search, location, maxPrice, page, limit, ... }
- * Re-fetches whenever the params change, or when reload() is called.
+ * Re-fetches when the params change, or when reload() is called.
  */
 export default function useHotels(params) {
-  const [reloadToken, setReloadToken] = useState(0)
-  const [state, setState] = useState({ key: null, hotels: [], pagination: null, error: '' })
+  const dispatch = useDispatch()
+  const { items, pagination, status, error } = useSelector((state) => state.hotels)
 
   const queryString = toQueryString(params)
-  const key = `${queryString}#${reloadToken}`
+
+  const reload = useCallback(() => {
+    dispatch(loadHotels(queryString))
+  }, [dispatch, queryString])
 
   useEffect(() => {
-    let ignore = false
+    dispatch(loadHotels(queryString))
+  }, [dispatch, queryString])
 
-    fetchHotels(queryString)
-      .then((res) => {
-        if (!ignore) setState({ key, hotels: res.data, pagination: res.pagination, error: '' })
-      })
-      .catch((err) => {
-        if (!ignore) setState({ key, hotels: [], pagination: null, error: err.message })
-      })
-
-    return () => {
-      ignore = true
-    }
-  }, [key, queryString])
+  // leaving the page: empty the list so the next page doesn't flash old hotels
+  useEffect(() => () => {
+    dispatch(clearList())
+  }, [dispatch])
 
   return {
-    hotels: state.hotels,
-    pagination: state.pagination,
-    error: state.error,
-    loading: state.key !== key, // true until the response for the current key arrives
-    reload: () => setReloadToken((t) => t + 1),
+    hotels: items,
+    pagination,
+    error,
+    loading: status === 'loading' || status === 'idle',
+    reload,
   }
 }

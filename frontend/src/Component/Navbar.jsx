@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
 import "./Navbar.css";
 
 function Navbar() {
@@ -15,7 +16,7 @@ function Navbar() {
     return (
         <nav className="navbar">
 
-            <img src="src/assets/logo.png" alt="Hotel Logo" />
+            <img src={logo} alt="Hotel Logo" />
 
             <div className="nav-links">
                 <a href="/">Home</a>

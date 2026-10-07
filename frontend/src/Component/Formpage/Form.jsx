@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { createHotel } from '../../api/hotels'
+import { useDispatch } from 'react-redux'
+import { Helmet } from 'react-helmet-async'
+import { addHotel } from '../../store/hotelsSlice'
 import './Form.css'
 
 const emptyForm = {
@@ -12,6 +14,8 @@ const emptyForm = {
 }
 
 const Form = () => {
+
+  const dispatch = useDispatch()
 
   const [values, setValues] = useState(emptyForm)
   const [image, setImage] = useState(null)
@@ -40,7 +44,7 @@ const Form = () => {
     if (image) formData.append('image', image)
 
     try {
-      const res = await createHotel(formData)
+      const res = await dispatch(addHotel(formData)).unwrap() // Redux thunk -> POST /api/hotels
       setMessage({ type: 'success', text: res.message })
       setValues(emptyForm)
       setImage(null)
@@ -54,6 +58,11 @@ const Form = () => {
 
   return (
     <div className="form-page">
+
+      <Helmet>
+        <title>Add Hotel | Mayyur Hotel</title>
+        <meta name="description" content="Add a new hotel with its price, location and photo." />
+      </Helmet>
 
       <div className="form-card">
 
